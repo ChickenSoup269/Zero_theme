@@ -4,6 +4,7 @@ export const TYPE_LABEL: Record<ThemeType, string> = {
   wallpaper: "Hình nền",
   code: "Code nền",
   mixed: "Mix",
+  liveWallpaper: "Hình nền động",
 }
 
 export function stableStringify(value: unknown) {
@@ -14,11 +15,15 @@ export function formatTagLabel(tag: string, lang: "vi" | "en" = "vi") {
   const key = tag.trim().toLowerCase()
   const map: Record<string, { vi: string; en: string }> = {
     "hình nền": { vi: "Hình nền", en: "Wallpaper" },
+    "hình nền động": { vi: "Hình nền động", en: "Live Wallpaper" },
     "code nền": { vi: "Code nền", en: "Code Theme" },
     "thiên nhiên": { vi: "Thiên nhiên", en: "Nature" },
     cyberpunk: { vi: "Cyberpunk", en: "Cyberpunk" },
     ngầu: { vi: "Ngầu", en: "Cool" },
     wallpaper: { vi: "Wallpaper", en: "Wallpaper" },
+    livewallpaper: { vi: "Hình nền động", en: "Live Wallpaper" },
+    "live wallpaper": { vi: "Hình nền động", en: "Live Wallpaper" },
+    "live-wallpaper": { vi: "Hình nền động", en: "Live Wallpaper" },
     code: { vi: "Code", en: "Code" },
     mixed: { vi: "Mix", en: "Mixed" },
   }
@@ -30,11 +35,34 @@ export function formatTagLabel(tag: string, lang: "vi" | "en" = "vi") {
     .join(" ")
 }
 
+function normalizeThemeType(value: unknown): ThemeType | null {
+  if (typeof value !== "string") return null
+  const key = value.trim().toLowerCase().replace(/[\s_-]+/g, "")
+  if (key === "wallpaper") return "wallpaper"
+  if (key === "code") return "code"
+  if (key === "mixed" || key === "mix") return "mixed"
+  if (key === "livewallpaper") return "liveWallpaper"
+  return null
+}
+
 export function getPreviewImage(item: ThemeItem) {
   const settings = (item.theme as any)?.settings ?? item.theme ?? {}
   return (
     item.previewImage || settings.background || settings.mediaOrbImageUrl || ""
   )
+}
+
+export function getApplyCode(item: ThemeItem) {
+  if (typeof item.applyCode === "string") return item.applyCode
+  if (typeof item.code === "string") return item.code
+
+  const themeCode = (item.theme as any)?.code
+  if (typeof themeCode === "string") return themeCode
+
+  const settings = (item.theme as any)?.settings
+  if (typeof settings?.code === "string") return settings.code
+
+  return stableStringify(settings ?? item.theme)
 }
 
 export function normalizeThemes(raw: unknown): ThemeItem[] {
@@ -66,12 +94,18 @@ function normalizeTheme(value: any, index = 0): ThemeItem | null {
     Boolean(settings.effect && settings.effect !== "none") ||
     Object.keys(settings).some((k) => /hacker|grid|crt|code|scan/i.test(k))
   const type: ThemeType =
-    value.type ??
+    normalizeThemeType(value.type) ??
     (hasImage && hasCodeEffect ? "mixed" : hasCodeEffect ? "code" : "wallpaper")
   const tags = Array.from(
     new Set([
       ...(value.tags ?? []),
-      type === "wallpaper" ? "hình nền" : type === "code" ? "code nền" : "mix",
+      type === "wallpaper"
+        ? "hình nền"
+        : type === "liveWallpaper"
+          ? "hình nền động"
+          : type === "code"
+            ? "code nền"
+            : "mix",
     ]),
   )
   return {
@@ -95,6 +129,9 @@ function normalizeTheme(value: any, index = 0): ThemeItem | null {
     )
       ? Number(value.favoriteCount ?? value.likes ?? value.stars)
       : 0,
+    json: value.json !== false,
+    code: value.code ?? value.theme?.code ?? value.theme?.settings?.code,
+    applyCode: value.applyCode,
     theme: value.theme ?? value,
   }
 }

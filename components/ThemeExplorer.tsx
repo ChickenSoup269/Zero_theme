@@ -13,16 +13,18 @@ import {
 } from "@/lib/firebase-votes"
 import {
   formatTagLabel,
+  getApplyCode,
   getPreviewImage,
   stableStringify,
 } from "@/lib/theme-utils"
 
 type LikeState = Record<string, { liked: boolean; bonus: number }>
 type ThemeStatState = Record<string, { votes: number; downloads: number }>
-type ViewMode = "split" | "compact"
+type ViewMode = "split" | "compact" | "mini"
 
 const STORAGE_KEY = "zero-theme-gallery-likes-v3"
 const DOWNLOAD_STORAGE_KEY = "zero-theme-gallery-downloads-v1"
+const VIEW_STORAGE_KEY = "zero-theme-gallery-view-mode-v1"
 
 export default function ThemeExplorer({ themes }: { themes: ThemeItem[] }) {
   const [q, setQ] = useState("")
@@ -30,9 +32,12 @@ export default function ThemeExplorer({ themes }: { themes: ThemeItem[] }) {
   const [tag, setTag] = useState("all")
   const [sort, setSort] = useState<"popular" | "newest" | "az">("popular")
   const [viewMode, setViewMode] = useState<ViewMode>("split")
+  const [page, setPage] = useState(1)
   const [likes, setLikes] = useState<LikeState>({})
   const [themeStats, setThemeStats] = useState<ThemeStatState>({})
-  const [localDownloads, setLocalDownloads] = useState<Record<string, number>>({})
+  const [localDownloads, setLocalDownloads] = useState<Record<string, number>>(
+    {},
+  )
   const [message, setMessage] = useState("")
   const [lang, setLang] = useState<Lang>("vi")
   const [activeItem, setActiveItem] = useState<ThemeItem | null>(null)
@@ -45,6 +50,14 @@ export default function ThemeExplorer({ themes }: { themes: ThemeItem[] }) {
       if (raw) setLikes(JSON.parse(raw))
       const rawDownloads = localStorage.getItem(DOWNLOAD_STORAGE_KEY)
       if (rawDownloads) setLocalDownloads(JSON.parse(rawDownloads))
+      const savedView = localStorage.getItem(VIEW_STORAGE_KEY)
+      if (
+        savedView === "split" ||
+        savedView === "compact" ||
+        savedView === "mini"
+      ) {
+        setViewMode(savedView)
+      }
       const voted = getLocalVotedIds()
       if (Object.keys(voted).length) {
         setLikes((prev) => ({
@@ -75,9 +88,22 @@ export default function ThemeExplorer({ themes }: { themes: ThemeItem[] }) {
   }, [localDownloads])
 
   useEffect(() => {
+    localStorage.setItem(VIEW_STORAGE_KEY, viewMode)
+  }, [viewMode])
+
+  useEffect(() => {
     const unsubscribe = listenThemeStats(setThemeStats)
     return unsubscribe
   }, [])
+
+  useEffect(() => {
+    setPage(1)
+  }, [q, type, tag, sort, viewMode])
+
+  useEffect(() => {
+    const top = document.querySelector(".marketplace-toolbar")
+    top?.scrollIntoView({ behavior: "smooth", block: "start" })
+  }, [page])
 
   const t = TEXT[lang]
   const tags = useMemo(
@@ -116,6 +142,11 @@ export default function ThemeExplorer({ themes }: { themes: ThemeItem[] }) {
     }))
     await countDownload(item).catch(() => {})
     setActionMessage(`${item.title}: ${t.downloadSaved}`)
+  }
+
+  async function copyApplyCode(item: ThemeItem) {
+    await navigator.clipboard.writeText(getApplyCode(item))
+    setActionMessage(`${item.title}: ${t.codeCopied}`)
   }
 
   async function toggleFavorite(item: ThemeItem) {
@@ -163,6 +194,14 @@ export default function ThemeExplorer({ themes }: { themes: ThemeItem[] }) {
     })
 
   const top = [...themes].sort((a, b) => countOf(b) - countOf(a))[0]
+  const pageSize = viewMode === "mini" ? 30 : 6
+  const pageCount = Math.max(1, Math.ceil(list.length / pageSize))
+  const safePage = Math.min(page, pageCount)
+  const pageItems = list.slice((safePage - 1) * pageSize, safePage * pageSize)
+
+  useEffect(() => {
+    if (page !== safePage) setPage(safePage)
+  }, [page, safePage])
 
   async function handleShare(item: ThemeItem) {
     const previewUrl = getPreviewImage(item)
@@ -242,6 +281,7 @@ export default function ThemeExplorer({ themes }: { themes: ThemeItem[] }) {
           <option value="all">{t.allTypes}</option>
           <option value="wallpaper">{t.wallpaper}</option>
           <option value="code">{t.code}</option>
+          <option value="liveWallpaper">{t.liveWallpaper}</option>
           <option value="mixed">{t.mixed}</option>
         </select>
         <select
@@ -261,9 +301,7 @@ export default function ThemeExplorer({ themes }: { themes: ThemeItem[] }) {
           value={sort}
           onChange={(e) => setSort(e.target.value as any)}
         >
-          <option value="popular">
-            {t.sortVotes}
-          </option>
+          <option value="popular">{t.sortVotes}</option>
           <option value="newest">{t.sortJson}</option>
           <option value="az">A → Z</option>
         </select>
@@ -286,16 +324,29 @@ export default function ThemeExplorer({ themes }: { themes: ThemeItem[] }) {
           >
             {t.viewCompact}
           </button>
+          <button
+            type="button"
+            className={viewMode === "mini" ? "active" : ""}
+            onClick={() => setViewMode("mini")}
+            aria-pressed={viewMode === "mini"}
+            title={t.viewMini}
+          >
+            {t.viewMini}
+          </button>
         </div>
       </div>
 
       <div className={`grid marketplace-grid ${viewMode}`}>
-        {list.map((item, index) => (
+        {pageItems.map((item, index) => (
           <ThemeCard
             key={item.id}
             item={item}
             lang={lang}
-            rank={sort === "popular" ? index + 1 : undefined}
+            rank={
+              sort === "popular"
+                ? (safePage - 1) * pageSize + index + 1
+                : undefined
+            }
             liked={Boolean(likes[item.id]?.liked)}
             liveLikes={countOf(item)}
             downloads={downloadCountOf(item)}
@@ -309,6 +360,28 @@ export default function ThemeExplorer({ themes }: { themes: ThemeItem[] }) {
         ))}
       </div>
 
+      <nav className="pagination" aria-label={t.pagination}>
+        <button
+          type="button"
+          className="btn ghost"
+          disabled={safePage <= 1}
+          onClick={() => setPage((current) => Math.max(1, current - 1))}
+        >
+          {t.prevPage}
+        </button>
+        <span>
+          {t.pageLabel} {safePage}/{pageCount}
+        </span>
+        <button
+          type="button"
+          className="btn ghost"
+          disabled={safePage >= pageCount}
+          onClick={() => setPage((current) => Math.min(pageCount, current + 1))}
+        >
+          {t.nextPage}
+        </button>
+      </nav>
+
       {activeItem || downloadTarget ? (
         <div
           className="theme-modal-overlay"
@@ -321,51 +394,48 @@ export default function ThemeExplorer({ themes }: { themes: ThemeItem[] }) {
           }}
         >
           <div
-            className="theme-modal"
+            className={
+              activeItem ? "theme-modal theme-preview-viewer" : "theme-modal"
+            }
             onClick={(event) => event.stopPropagation()}
           >
             {activeItem ? (
               <>
-                <div
-                  className="theme-modal-visual"
-                  style={
-                    activePreview
-                      ? { backgroundImage: `url(${activePreview})` }
-                      : undefined
-                  }
-                />
-                <div className="theme-modal-body">
-                  <div className="theme-modal-head">
-                    <div>
-                      <p className="theme-modal-kicker">
-                        {formatTagLabel(activeItem.type, lang)}
-                      </p>
-                      <h3>{activeItem.title}</h3>
+                <div className="theme-preview-stage">
+                  {activePreview ? (
+                    <img src={activePreview} alt={activeItem.title} />
+                  ) : (
+                    <div className="theme-preview-empty">
+                      {activeItem.title}
                     </div>
-                    <button
-                      className="btn ghost"
-                      onClick={() => setActiveItem(null)}
-                    >
-                      {t.cancel}
-                    </button>
+                  )}
+                </div>
+                <div className="theme-preview-bar">
+                  <div>
+                    <p className="theme-modal-kicker">
+                      {formatTagLabel(activeItem.type, lang)}
+                    </p>
+                    <h3>{activeItem.title}</h3>
+                    {activeItem.description ? (
+                      <p className="theme-preview-description">
+                        {activeItem.description}
+                      </p>
+                    ) : null}
                   </div>
-                  <p className="lead">{activeItem.description}</p>
-                  <div className="tag-row">
-                    {activeItem.tags.map((tagName) => (
-                      <span key={tagName} className="tag">
-                        #{formatTagLabel(tagName, lang)}
-                      </span>
-                    ))}
-                  </div>
-                  <div className="action-row">
+                  <div className="theme-preview-actions">
                     <button
                       className="btn primary"
-                      onClick={() => {
-                        setDownloadTarget(activeItem)
+                      onClick={async () => {
+                        if (activeItem.json) {
+                          setDownloadTarget(activeItem)
+                          setActiveItem(null)
+                          return
+                        }
+                        await copyApplyCode(activeItem)
                         setActiveItem(null)
                       }}
                     >
-                      {t.downloadJson}
+                      {activeItem.json ? t.downloadJson : t.copyApplyCode}
                     </button>
                     <button
                       className="btn ghost"

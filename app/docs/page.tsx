@@ -9,7 +9,7 @@ const schema = {
       id: "unique-id",
       title: "Tên theme",
       description: "Mô tả ngắn",
-      type: "wallpaper | code | mixed",
+      type: "wallpaper | liveWallpaper | code | mixed",
       tags: ["hình nền", "thiên nhiên", "cyberpunk"],
       previewImage: "https://.../cover.jpg",
       downloadUrl: "/examples/theme.json",

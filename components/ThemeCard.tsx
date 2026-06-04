@@ -1,9 +1,11 @@
 "use client"
 
+import { useState } from "react"
 import { ThemeItem } from "@/lib/types"
 import { Lang, TEXT } from "@/lib/i18n"
 import {
   formatTagLabel,
+  getApplyCode,
   getPreviewImage,
   stableStringify,
   TYPE_LABEL,
@@ -17,7 +19,7 @@ type Props = {
   liked?: boolean
   liveLikes?: number
   downloads?: number
-  viewMode?: "split" | "compact"
+  viewMode?: "split" | "compact" | "mini"
   onToggleFavorite?: (item: ThemeItem) => void
   onRequestPreview?: (item: ThemeItem) => void
   onRequestDownload?: (item: ThemeItem) => void
@@ -42,8 +44,12 @@ export default function ThemeCard({
   const t = TEXT[lang]
   const img = getPreviewImage(item)
   const safeLikes = Number.isFinite(Number(liveLikes)) ? Number(liveLikes) : 0
-  const safeDownloads = Number.isFinite(Number(downloads)) ? Number(downloads) : 0
+  const safeDownloads = Number.isFinite(Number(downloads))
+    ? Number(downloads)
+    : 0
   const json = stableStringify(item.theme)
+  const applyCode = getApplyCode(item)
+  const [copiedCode, setCopiedCode] = useState(false)
 
   async function downloadTheme() {
     const blob = new Blob([json], { type: "application/json;charset=utf-8" })
@@ -70,6 +76,13 @@ export default function ThemeCard({
   }
 
   async function handleDownload() {
+    if (!item.json) {
+      await navigator.clipboard.writeText(applyCode)
+      setCopiedCode(true)
+      setTimeout(() => setCopiedCode(false), 1400)
+      return
+    }
+
     if (onRequestDownload) {
       onRequestDownload(item)
       return
@@ -168,6 +181,7 @@ export default function ThemeCard({
             className={`inline-flex items-center gap-1.5 rounded-full py-1.5 px-2.5 font-extrabold text-[12px] [text-shadow:none] w-fit
             ${item.type === "code" ? "bg-[#67e8f9] text-[#042f2e]" : ""}
             ${item.type === "wallpaper" ? "bg-[#bbf7d0] text-[#052e16]" : ""}
+            ${item.type === "liveWallpaper" ? "bg-[#fcd34d] text-[#78350f]" : ""}
             ${item.type === "mixed" ? "bg-[#ddd6fe] text-[#2e1065]" : ""}
             ${item.type !== "code" && item.type !== "wallpaper" && item.type !== "mixed" ? "bg-[#ffffffed] text-[#0f172a]" : ""}
           `}
@@ -180,7 +194,7 @@ export default function ThemeCard({
         </div>
       </button>
 
-      <div className="flex-1 min-w-0 p-[22px] pr-[92px] flex flex-col justify-start gap-4 bg-gradient-to-b from-white/[0.03] to-transparent">
+      <div className="theme-card-body flex-1 min-w-0 p-[22px] pr-[92px] flex flex-col justify-start gap-4 bg-gradient-to-b from-white/[0.03] to-transparent">
         <div className="flex flex-col gap-1.5 justify-between items-start">
           <div className="min-w-0 flex-1">
             <h3 className="m-0 text-[23px] leading-[1.05] tracking-[-0.04em] text-[#0f172a] dark:text-white font-extrabold">
@@ -194,13 +208,15 @@ export default function ThemeCard({
 
         <div className="theme-card-metrics">
           <span>
-            <strong>{safeLikes.toLocaleString(lang === "vi" ? "vi-VN" : "en-US")}</strong>
-            {" "}
+            <strong>
+              {safeLikes.toLocaleString(lang === "vi" ? "vi-VN" : "en-US")}
+            </strong>{" "}
             {t.voteCount}
           </span>
           <span>
-            <strong>{safeDownloads.toLocaleString(lang === "vi" ? "vi-VN" : "en-US")}</strong>
-            {" "}
+            <strong>
+              {safeDownloads.toLocaleString(lang === "vi" ? "vi-VN" : "en-US")}
+            </strong>{" "}
             {t.downloadCount}
           </span>
         </div>
@@ -225,7 +241,11 @@ export default function ThemeCard({
             className="btn primary py-2.5 px-3.5 rounded-full inline-flex items-center justify-center gap-2 cursor-pointer font-black text-[14px] bg-gradient-to-r from-[#22c55e] to-[#14b8a6] text-[#02140a] shadow-[0_10px_30px_rgba(34,197,94,0.22)] min-h-[40px] w-full"
             onClick={handleDownload}
           >
-            {t.downloadJson}
+            {item.json
+              ? t.downloadJson
+              : copiedCode
+                ? t.codeCopied
+                : t.copyApplyCode}
           </button>
           <button
             className="btn ghost py-2.5 px-3.5 rounded-full inline-flex items-center justify-center gap-2 cursor-pointer font-bold text-[14px] border bg-[#0f172a0d] border-[#0f172a1a] text-[#0f172a] dark:bg-white/10 dark:border-white/15 dark:text-[#f8fafc] min-h-[40px] w-full"

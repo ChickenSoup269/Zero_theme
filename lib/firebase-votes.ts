@@ -15,6 +15,7 @@ export const isFirebaseConfigured = configured
 import { ThemeItem } from "./types"
 
 export type VoteCounts = Record<string, number>
+export type ThemeStats = Record<string, { votes: number; downloads: number }>
 
 const LOCAL_VOTED_KEY = "zero-theme-gallery-firebase-voted-v1"
 
@@ -74,6 +75,25 @@ export function listenThemeVotes(onChange: (counts: VoteCounts) => void) {
       counts[themeDoc.id] = Number(data.votes ?? 0)
     })
     onChange(counts)
+  })
+}
+
+export function listenThemeStats(onChange: (stats: ThemeStats) => void) {
+  if (!db || !isFirebaseConfigured) {
+    onChange({})
+    return () => {}
+  }
+
+  return onSnapshot(collection(db, "themes"), (snapshot) => {
+    const stats: ThemeStats = {}
+    snapshot.forEach((themeDoc) => {
+      const data = themeDoc.data()
+      stats[themeDoc.id] = {
+        votes: Number(data.votes ?? 0),
+        downloads: Number(data.downloads ?? 0),
+      }
+    })
+    onChange(stats)
   })
 }
 

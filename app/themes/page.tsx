@@ -12,8 +12,8 @@ export default function ThemesPage() {
   const themes = normalizeThemes(themesRaw)
   return (
     <main className="container">
-      <h1>{t.openGallery}</h1>
-      <p className="lead">{t.voteHint}</p>
+      <h1>{t.galleryTitle}</h1>
+      <p className="lead">{t.gallerySubtitle}</p>
       <ThemeExplorer themes={themes} />
     </main>
   )

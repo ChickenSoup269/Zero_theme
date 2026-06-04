@@ -7,7 +7,7 @@ import { Lang, TEXT } from "@/lib/i18n"
 import {
   getLocalVotedIds,
   isFirebaseConfigured,
-  listenThemeVotes,
+  listenThemeStats,
   voteTheme,
   countDownload,
 } from "@/lib/firebase-votes"
@@ -18,16 +18,21 @@ import {
 } from "@/lib/theme-utils"
 
 type LikeState = Record<string, { liked: boolean; bonus: number }>
+type ThemeStatState = Record<string, { votes: number; downloads: number }>
+type ViewMode = "split" | "compact"
 
 const STORAGE_KEY = "zero-theme-gallery-likes-v3"
+const DOWNLOAD_STORAGE_KEY = "zero-theme-gallery-downloads-v1"
 
 export default function ThemeExplorer({ themes }: { themes: ThemeItem[] }) {
   const [q, setQ] = useState("")
   const [type, setType] = useState<"all" | ThemeType>("all")
   const [tag, setTag] = useState("all")
   const [sort, setSort] = useState<"popular" | "newest" | "az">("popular")
+  const [viewMode, setViewMode] = useState<ViewMode>("split")
   const [likes, setLikes] = useState<LikeState>({})
-  const [voteCounts, setVoteCounts] = useState<Record<string, number>>({})
+  const [themeStats, setThemeStats] = useState<ThemeStatState>({})
+  const [localDownloads, setLocalDownloads] = useState<Record<string, number>>({})
   const [message, setMessage] = useState("")
   const [lang, setLang] = useState<Lang>("vi")
   const [activeItem, setActiveItem] = useState<ThemeItem | null>(null)
@@ -38,6 +43,8 @@ export default function ThemeExplorer({ themes }: { themes: ThemeItem[] }) {
     try {
       const raw = localStorage.getItem(STORAGE_KEY)
       if (raw) setLikes(JSON.parse(raw))
+      const rawDownloads = localStorage.getItem(DOWNLOAD_STORAGE_KEY)
+      if (rawDownloads) setLocalDownloads(JSON.parse(rawDownloads))
       const voted = getLocalVotedIds()
       if (Object.keys(voted).length) {
         setLikes((prev) => ({
@@ -64,7 +71,11 @@ export default function ThemeExplorer({ themes }: { themes: ThemeItem[] }) {
   }, [likes])
 
   useEffect(() => {
-    const unsubscribe = listenThemeVotes(setVoteCounts)
+    localStorage.setItem(DOWNLOAD_STORAGE_KEY, JSON.stringify(localDownloads))
+  }, [localDownloads])
+
+  useEffect(() => {
+    const unsubscribe = listenThemeStats(setThemeStats)
     return unsubscribe
   }, [])
 
@@ -77,8 +88,14 @@ export default function ThemeExplorer({ themes }: { themes: ThemeItem[] }) {
 
   function countOf(item: ThemeItem) {
     if (isFirebaseConfigured)
-      return Math.max(0, Number(voteCounts[item.id] ?? 0))
+      return Math.max(0, Number(themeStats[item.id]?.votes ?? 0))
     return Math.max(0, likes[item.id]?.bonus ?? 0)
+  }
+
+  function downloadCountOf(item: ThemeItem) {
+    if (isFirebaseConfigured)
+      return Math.max(0, Number(themeStats[item.id]?.downloads ?? 0))
+    return Math.max(0, Number(localDownloads[item.id] ?? 0))
   }
 
   async function downloadTheme(item: ThemeItem) {
@@ -93,8 +110,12 @@ export default function ThemeExplorer({ themes }: { themes: ThemeItem[] }) {
     anchor.click()
     anchor.remove()
     URL.revokeObjectURL(url)
+    setLocalDownloads((prev) => ({
+      ...prev,
+      [item.id]: Math.max(0, Number(prev[item.id] ?? 0)) + 1,
+    }))
     await countDownload(item).catch(() => {})
-    setActionMessage(`${item.title}: ${t.confirmDownloadCta}`)
+    setActionMessage(`${item.title}: ${t.downloadSaved}`)
   }
 
   async function toggleFavorite(item: ThemeItem) {
@@ -141,7 +162,6 @@ export default function ThemeExplorer({ themes }: { themes: ThemeItem[] }) {
       return themes.indexOf(a) - themes.indexOf(b)
     })
 
-  const totalLikes = themes.reduce((sum, item) => sum + countOf(item), 0)
   const top = [...themes].sort((a, b) => countOf(b) - countOf(a))[0]
 
   async function handleShare(item: ThemeItem) {
@@ -179,16 +199,13 @@ export default function ThemeExplorer({ themes }: { themes: ThemeItem[] }) {
     <>
       <section className="vote-panel">
         <div>
-          <h2>{isFirebaseConfigured ? t.firebaseVotesTitle : t.voteAll}</h2>
-          <p>{isFirebaseConfigured ? t.firebaseVotesHint : t.voteHint}</p>
+          <h2>{t.galleryPanelTitle}</h2>
+          <p>{t.galleryPanelHint}</p>
           {message ? <p className="vote-message">{message}</p> : null}
           {actionMessage ? (
             <p className="vote-message">{actionMessage}</p>
           ) : null}
         </div>
-        {!isFirebaseConfigured ? (
-          <span className="firebase-warning">{t.firebaseMissing}</span>
-        ) : null}
       </section>
 
       <section className="stats-strip">
@@ -198,13 +215,15 @@ export default function ThemeExplorer({ themes }: { themes: ThemeItem[] }) {
         </div>
         <div>
           <strong>
-            {totalLikes.toLocaleString(lang === "vi" ? "vi-VN" : "en-US")}
+            {themes
+              .reduce((sum, item) => sum + downloadCountOf(item), 0)
+              .toLocaleString(lang === "vi" ? "vi-VN" : "en-US")}
           </strong>
-          <span>{isFirebaseConfigured ? t.realVotes : t.localLikes}</span>
+          <span>{t.downloads}</span>
         </div>
         <div>
           <strong>{top && countOf(top) > 0 ? top.title : t.none}</strong>
-          <span>{isFirebaseConfigured ? t.topReal : t.topLocal}</span>
+          <span>{t.topVoted}</span>
         </div>
       </section>
 
@@ -243,14 +262,34 @@ export default function ThemeExplorer({ themes }: { themes: ThemeItem[] }) {
           onChange={(e) => setSort(e.target.value as any)}
         >
           <option value="popular">
-            {isFirebaseConfigured ? t.topReal : t.sortLocal}
+            {t.sortVotes}
           </option>
           <option value="newest">{t.sortJson}</option>
           <option value="az">A → Z</option>
         </select>
+        <div className="view-toggle" aria-label={t.viewMode}>
+          <button
+            type="button"
+            className={viewMode === "split" ? "active" : ""}
+            onClick={() => setViewMode("split")}
+            aria-pressed={viewMode === "split"}
+            title={t.viewSplit}
+          >
+            {t.viewSplit}
+          </button>
+          <button
+            type="button"
+            className={viewMode === "compact" ? "active" : ""}
+            onClick={() => setViewMode("compact")}
+            aria-pressed={viewMode === "compact"}
+            title={t.viewCompact}
+          >
+            {t.viewCompact}
+          </button>
+        </div>
       </div>
 
-      <div className="grid marketplace-grid">
+      <div className={`grid marketplace-grid ${viewMode}`}>
         {list.map((item, index) => (
           <ThemeCard
             key={item.id}
@@ -259,6 +298,8 @@ export default function ThemeExplorer({ themes }: { themes: ThemeItem[] }) {
             rank={sort === "popular" ? index + 1 : undefined}
             liked={Boolean(likes[item.id]?.liked)}
             liveLikes={countOf(item)}
+            downloads={downloadCountOf(item)}
+            viewMode={viewMode}
             onToggleFavorite={toggleFavorite}
             onRequestPreview={setActiveItem}
             onRequestDownload={setDownloadTarget}

@@ -16,6 +16,8 @@ type Props = {
   rank?: number
   liked?: boolean
   liveLikes?: number
+  downloads?: number
+  viewMode?: "split" | "compact"
   onToggleFavorite?: (item: ThemeItem) => void
   onRequestPreview?: (item: ThemeItem) => void
   onRequestDownload?: (item: ThemeItem) => void
@@ -29,6 +31,8 @@ export default function ThemeCard({
   rank,
   liked = false,
   liveLikes,
+  downloads,
+  viewMode = "split",
   onToggleFavorite,
   onRequestPreview,
   onRequestDownload,
@@ -38,6 +42,7 @@ export default function ThemeCard({
   const t = TEXT[lang]
   const img = getPreviewImage(item)
   const safeLikes = Number.isFinite(Number(liveLikes)) ? Number(liveLikes) : 0
+  const safeDownloads = Number.isFinite(Number(downloads)) ? Number(downloads) : 0
   const json = stableStringify(item.theme)
 
   async function downloadTheme() {
@@ -102,12 +107,12 @@ export default function ThemeCard({
 
   return (
     <article
-      className="group relative overflow-hidden rounded-[30px] flex flex-col items-stretch transition-all duration-200 ease-in-out hover:-translate-y-1.5 bg-white border border-[#0f172a1f] shadow-[0_20px_60px_rgba(71,85,105,0.2)] dark:bg-gradient-to-b dark:from-[#182235] dark:to-[#0b1020] dark:border-white/15 dark:shadow-[0_22px_60px_rgba(0,0,0,0.45)] hover:border-white/33 hover:shadow-[0_34px_90px_rgba(0,0,0,0.75)]"
+      className={`theme-card theme-card-horizontal theme-card-${viewMode} group relative overflow-hidden rounded-[22px] items-stretch transition-all duration-200 ease-in-out hover:-translate-y-1 bg-white border border-[#0f172a1f] shadow-[0_18px_48px_rgba(71,85,105,0.16)] dark:bg-[#0b1020] dark:border-white/15 dark:shadow-[0_22px_60px_rgba(0,0,0,0.35)] hover:border-[#22c55e66]`}
       data-type={item.type}
       data-tags={item.tags.join(",")}
     >
       <button
-        className={`absolute top-3.5 right-3.5 z-10 flex items-center gap-1.5 border rounded-full py-2 px-3 shadow-[0_10px_30px_rgba(0,0,0,0.5)] backdrop-blur-[10px] cursor-pointer font-black transition-all duration-200
+        className={`star-btn absolute top-3.5 right-3.5 z-10 flex items-center gap-1.5 border rounded-full py-2 px-3 shadow-[0_10px_30px_rgba(0,0,0,0.35)] backdrop-blur-[10px] cursor-pointer font-black transition-all duration-200
           ${
             liked
               ? "bg-gradient-to-br from-[#facc15] to-[#fb923c] text-[#111827] border-[#fde68a]"
@@ -145,7 +150,7 @@ export default function ThemeCard({
       ) : null}
 
       <button
-        className="w-full h-[220px] relative overflow-hidden isolate cursor-pointer text-left p-0 border-0 bg-transparent rounded-t-[30px] rounded-b-none"
+        className="theme-card-preview min-h-[240px] h-full relative overflow-hidden isolate cursor-pointer text-left p-0 border-0 bg-transparent"
         type="button"
         onClick={handlePreview}
         aria-label={t.viewFullscreen}
@@ -175,16 +180,29 @@ export default function ThemeCard({
         </div>
       </button>
 
-      <div className="flex-1 min-w-0 p-[22px] flex flex-col justify-start gap-4 bg-gradient-to-b from-white/[0.03] to-transparent">
+      <div className="flex-1 min-w-0 p-[22px] pr-[92px] flex flex-col justify-start gap-4 bg-gradient-to-b from-white/[0.03] to-transparent">
         <div className="flex flex-col gap-1.5 justify-between items-start">
           <div className="min-w-0 flex-1">
             <h3 className="m-0 text-[23px] leading-[1.05] tracking-[-0.04em] text-[#0f172a] dark:text-white font-extrabold">
               {item.title}
             </h3>
-            <p className="mt-1.5 mb-0 text-sm leading-normal text-[#334155] dark:text-[#dbe4f0] line-clamp-3">
+            <p className="mt-1.5 mb-0 text-sm leading-normal text-[#334155] dark:text-[#dbe4f0] line-clamp-2">
               {item.description}
             </p>
           </div>
+        </div>
+
+        <div className="theme-card-metrics">
+          <span>
+            <strong>{safeLikes.toLocaleString(lang === "vi" ? "vi-VN" : "en-US")}</strong>
+            {" "}
+            {t.voteCount}
+          </span>
+          <span>
+            <strong>{safeDownloads.toLocaleString(lang === "vi" ? "vi-VN" : "en-US")}</strong>
+            {" "}
+            {t.downloadCount}
+          </span>
         </div>
 
         <div className="flex justify-between gap-2.5 items-start">
@@ -202,9 +220,9 @@ export default function ThemeCard({
           </div>
         </div>
 
-        <div className="flex flex-col gap-2.5 mt-auto">
+        <div className="grid grid-cols-2 gap-2.5 mt-auto">
           <button
-            className="btn primary py-2.5 px-3.5 rounded-full inline-flex items-center justify-center gap-2 cursor-pointer font-black text-[14px] bg-gradient-to-r from-[#22c55e] to-[#14b8a6] text-[#02140a] shadow-[0_10px_30px_rgba(34,197,94,0.27)] min-h-[40px] w-full"
+            className="btn primary py-2.5 px-3.5 rounded-full inline-flex items-center justify-center gap-2 cursor-pointer font-black text-[14px] bg-gradient-to-r from-[#22c55e] to-[#14b8a6] text-[#02140a] shadow-[0_10px_30px_rgba(34,197,94,0.22)] min-h-[40px] w-full"
             onClick={handleDownload}
           >
             {t.downloadJson}

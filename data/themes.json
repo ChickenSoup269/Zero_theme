@@ -1,0 +1,67 @@
+[
+  {
+    "id": "forest-glass-01",
+    "title": "Forest Glass",
+    "description": "Tone xanh lá, glassmorphism, phù hợp startpage nhẹ và sạch.",
+    "type": "wallpaper",
+    "tags": ["hình nền", "thiên nhiên", "glass", "xanh lá"],
+    "previewImage": "https://images.unsplash.com/photo-1448375240586-882707db888b?q=80&w=1200&auto=format&fit=crop",
+    "downloadUrl": "/examples/startpage-sample.json",
+    "theme": {
+      "settings": {
+        "accentColor": "#1ba766",
+        "gradientStart": "#0a1a0f",
+        "gradientEnd": "#1a3e21",
+        "sidebarBg": "rgba(20, 20, 25, 0.85)",
+        "panelBg": "rgba(26, 46, 31, 0.7)",
+        "clockColor": "#ffffff",
+        "dateColor": "#ffffff",
+        "effect": "none",
+        "background": "https://images.unsplash.com/photo-1448375240586-882707db888b?q=80&w=2400&auto=format&fit=crop"
+      }
+    },
+    "favoriteCount": 0
+  },
+  {
+    "id": "cyberpunk-code-01",
+    "title": "Neon Cyberpunk Code",
+    "description": "Màu neon, hợp tag code nền/cyberpunk để user tìm nhanh.",
+    "type": "code",
+    "tags": ["code nền", "cyberpunk", "ngầu", "neon"],
+    "previewImage": "https://images.unsplash.com/photo-1519608487953-e999c86e7455?q=80&w=1200&auto=format&fit=crop",
+    "theme": {
+      "settings": {
+        "accentColor": "#00ffcc",
+        "gradientStart": "#070019",
+        "gradientEnd": "#21004f",
+        "hackerColor": "#00FF00",
+        "gridScanColor": "#00ffcc",
+        "clockColor": "#ecfeff",
+        "dateColor": "#a5f3fc",
+        "effect": "grid-scan",
+        "background": "https://images.unsplash.com/photo-1519608487953-e999c86e7455?q=80&w=2400&auto=format&fit=crop"
+      }
+    },
+    "favoriteCount": 0
+  },
+  {
+    "id": "soft-aurora-01",
+    "title": "Soft Aurora",
+    "description": "Aurora mềm, tag chill/gradient/abstract.",
+    "type": "wallpaper",
+    "tags": ["hình nền", "aurora", "chill", "gradient"],
+    "previewImage": "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=1200&auto=format&fit=crop",
+    "theme": {
+      "settings": {
+        "accentColor": "#a855f7",
+        "softAuroraColor1": "#f7f7f7",
+        "softAuroraColor2": "#e100ff",
+        "softAuroraActive": true,
+        "gradientStart": "#13001f",
+        "gradientEnd": "#0b1026",
+        "background": "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=2400&auto=format&fit=crop"
+      }
+    },
+    "favoriteCount": 0
+  }
+]

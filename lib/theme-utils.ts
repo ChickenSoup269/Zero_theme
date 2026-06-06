@@ -115,6 +115,18 @@ function normalizeTheme(value: any, index = 0): ThemeItem | null {
     description:
       value.description ??
       `Import tự động từ JSON, giữ nguyên thứ tự và cấu trúc settings/bookmarks nếu có.`,
+    author:
+      value.author ??
+      value.creator ??
+      value.user ??
+      value.theme?.author ??
+      value.theme?.metadata?.author,
+    authorUrl:
+      value.authorUrl ??
+      value.creatorUrl ??
+      value.profileUrl ??
+      value.theme?.authorUrl ??
+      value.theme?.metadata?.authorUrl,
     type,
     tags,
     previewImage:

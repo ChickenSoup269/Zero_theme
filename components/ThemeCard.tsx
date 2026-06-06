@@ -200,6 +200,22 @@ export default function ThemeCard({
             <h3 className="m-0 text-[23px] leading-[1.05] tracking-[-0.04em] text-[#0f172a] dark:text-white font-extrabold">
               {item.title}
             </h3>
+            {item.author ? (
+              <p className="theme-author-line">
+                {t.authorLabel}:{" "}
+                {item.authorUrl ? (
+                  <a
+                    href={item.authorUrl}
+                    rel="noopener noreferrer"
+                    target="_blank"
+                  >
+                    {item.author}
+                  </a>
+                ) : (
+                  <span>{item.author}</span>
+                )}
+              </p>
+            ) : null}
             <p className="mt-1.5 mb-0 text-sm leading-normal text-[#334155] dark:text-[#dbe4f0] line-clamp-2">
               {item.description}
             </p>

@@ -70,6 +70,20 @@ export default function Home() {
           </Link>
         </div>
       </section>
+      <section className="home-summary-strip">
+        <div>
+          <strong>{themes.length}</strong>
+          <span>{lang === "vi" ? "theme đang có" : "themes available"}</span>
+        </div>
+        <div>
+          <strong>JSON / Code</strong>
+          <span>{lang === "vi" ? "tải file hoặc copy mã áp" : "download files or copy apply code"}</span>
+        </div>
+        <div>
+          <strong>Live Wallpaper</strong>
+          <span>{lang === "vi" ? "sẵn cấu trúc để mở rộng" : "ready for expansion"}</span>
+        </div>
+      </section>
       <section className="home-top-section">
         <div className="section-heading">
           <div>
@@ -97,6 +111,11 @@ export default function Home() {
                   {formatTagLabel(theme.type, lang)}
                 </span>
                 <strong>{theme.title}</strong>
+                {theme.author ? (
+                  <em>
+                    {t.authorLabel}: {theme.author}
+                  </em>
+                ) : null}
                 {theme.description ? <span>{theme.description}</span> : null}
               </Link>
             )

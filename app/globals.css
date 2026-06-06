@@ -189,6 +189,31 @@ textarea {
 .home-top-section {
   margin-top: 52px;
 }
+.home-summary-strip {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-top: 26px;
+}
+.home-summary-strip > div {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 16px;
+  background: linear-gradient(180deg, #ffffff12, #ffffff08);
+}
+.home-summary-strip strong {
+  display: block;
+  color: var(--text);
+  font-size: clamp(20px, 2.5vw, 30px);
+  line-height: 1.05;
+}
+.home-summary-strip span {
+  display: block;
+  margin-top: 6px;
+  color: var(--muted);
+  line-height: 1.35;
+}
 .section-heading {
   display: flex;
   align-items: flex-end;
@@ -256,6 +281,12 @@ textarea {
   font-size: clamp(21px, 3vw, 34px);
   line-height: 1;
 }
+.home-top-card em {
+  color: #d1fae5;
+  font-style: normal;
+  font-size: 13px;
+  font-weight: 850;
+}
 .home-top-card > span:last-child {
   color: #dbe4f0;
   line-height: 1.45;
@@ -309,6 +340,27 @@ textarea {
   grid-template-columns: 1fr;
   gap: 10px;
   min-width: 220px;
+}
+.schema-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin: 18px 0;
+}
+.schema-info-grid > div {
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 16px;
+  background: color-mix(in srgb, var(--panel) 72%, transparent);
+}
+.schema-info-grid strong {
+  display: block;
+  margin-bottom: 8px;
+}
+.schema-info-grid p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.55;
 }
 .footer {
   padding: 30px 5vw;
@@ -470,8 +522,10 @@ textarea {
   .hero,
   .split,
   .stats-strip,
+  .home-summary-strip,
   .home-top-grid,
-  .upload-stub-panel {
+  .upload-stub-panel,
+  .schema-info-grid {
     grid-template-columns: 1fr;
   }
   .section-heading {
@@ -931,6 +985,15 @@ html[data-theme="light"] .vote-panel {
   color: var(--text);
   font-size: 20px;
   line-height: 1;
+}
+.theme-author-line {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+.theme-author-line a {
+  color: var(--accent);
 }
 .preview-info h3 {
   overflow-wrap: anywhere;

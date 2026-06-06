@@ -4,6 +4,8 @@ export type ThemeItem = {
   id: string
   title: string
   description?: string
+  author?: string
+  authorUrl?: string
   type: ThemeType
   tags: string[]
   previewImage?: string

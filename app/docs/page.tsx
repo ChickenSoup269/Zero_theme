@@ -9,13 +9,25 @@ const schema = {
       id: "unique-id",
       title: "Tên theme",
       description: "Mô tả ngắn",
+      author: "Tên tác giả",
+      authorUrl: "https://facebook.com/...",
       type: "wallpaper | liveWallpaper | code | mixed",
       tags: ["hình nền", "thiên nhiên", "cyberpunk"],
       previewImage: "https://.../cover.jpg",
       downloadUrl: "/examples/theme.json",
+      json: true,
+      code: "SPC1... nếu json là false",
+      status: "draft | published",
+      supportServer: false,
       theme: {
         source: "zero-startpage",
         version: 2,
+        metadata: {
+          author: "Tên tác giả",
+          authorUrl: "https://facebook.com/...",
+          license: "free-to-use",
+          note: "Nếu project được ủng hộ nhiều sẽ đầu tư server upload thật.",
+        },
         settings: { accentColor: "#1ba766", background: "https://..." },
         bookmarks: { groups: [] },
       },
@@ -40,11 +52,11 @@ export default function DocsPage() {
             {lang === "vi" ? "Kết nối sau" : "Server-ready"}
           </p>
           <h2>{lang === "vi" ? "Khu đăng theme giả lập" : "Mock theme uploader"}</h2>
-          <p>
-            {lang === "vi"
-              ? "Các nút này chưa upload thật, nhưng đã tách sẵn action để sau này nối API lưu ảnh và JSON."
-              : "These buttons do not upload yet, but their actions are separated for a later image and JSON API."}
-          </p>
+        <p>
+          {lang === "vi"
+            ? "Các nút này chưa upload thật, nhưng đã tách sẵn action để sau này nối API lưu ảnh, mã áp, thông tin tác giả và JSON."
+            : "These buttons do not upload yet, but their actions are separated for a later image, apply-code, author, and JSON API."}
+        </p>
         </div>
         <div className="upload-actions">
           <button className="btn primary" data-action="upload-image" type="button">
@@ -56,6 +68,24 @@ export default function DocsPage() {
           <button className="btn ghost" data-action="upload-apply-code" type="button">
             {lang === "vi" ? "Đăng mã áp" : "Upload apply code"}
           </button>
+        </div>
+      </section>
+      <section className="schema-info-grid">
+        <div>
+          <strong>{lang === "vi" ? "Thông tin tác giả" : "Author info"}</strong>
+          <p>
+            {lang === "vi"
+              ? "Mỗi theme có thể thêm author và authorUrl để hiển thị người tạo hoặc nguồn đóng góp."
+              : "Each theme can include author and authorUrl to display the creator or contribution source."}
+          </p>
+        </div>
+        <div>
+          <strong>{lang === "vi" ? "Đầu tư server" : "Server funding"}</strong>
+          <p>
+            {lang === "vi"
+              ? "Nếu project được ủng hộ nhiều, phần upload sẽ được nâng cấp thành server thật để duyệt và lưu theme."
+              : "If the project receives enough support, the upload area can become a real server-backed submission flow."}
+          </p>
         </div>
       </section>
       <section className="docs-note-panel">

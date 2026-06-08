@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import SiteControls from "./SiteControls"
 import { TEXT } from "@/lib/i18n"
 import { useSiteLanguage } from "@/lib/use-site-language"
@@ -12,6 +12,16 @@ export default function SiteChrome() {
   const t = TEXT[lang]
   const pathname = usePathname()
   const [menuOpen, setMenuOpen] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20)
+    }
+    window.addEventListener("scroll", handleScroll)
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [])
+
   const navItems = [
     { href: "/themes", label: t.openGallery },
     { href: "/docs", label: t.docs },
@@ -24,9 +34,10 @@ export default function SiteChrome() {
 
   return (
     <>
-      <nav className={`nav ${menuOpen ? "menu-open" : ""}`}>
+      <nav className={`nav ${menuOpen ? "menu-open" : ""} ${scrolled ? "scrolled" : ""}`}>
         <Link className="brand" href="/">
-          Zero Theme Gallery
+          <img src="/icon.png" alt="" width="32" height="32" />
+          <span>Zero Theme Gallery</span>
         </Link>
         <button
           className="mobile-menu-button"
@@ -54,6 +65,15 @@ export default function SiteChrome() {
         </div>
         <SiteControls />
       </nav>
+      <button
+        className={`scroll-to-top ${scrolled ? "visible" : ""}`}
+        onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+        aria-label="Scroll to top"
+      >
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M18 15l-6-6-6 6" />
+        </svg>
+      </button>
       <footer className="footer">{t.footer}</footer>
     </>
   )

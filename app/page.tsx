@@ -43,47 +43,76 @@ export default function Home() {
   return (
     <main className="container">
       <section className="hero">
-        <div>
+        <div className="hero-content">
+          <div className="hero-decor">
+            <img src="/images/svg_wave/wave1.png" alt="" className="wave wave-1" />
+            <img src="/images/svg_wave/wave2.png" alt="" className="wave wave-2" />
+          </div>
           <h1>{t.title}</h1>
           <p>{t.subtitle}</p>
           <div className="links">
-            <Link className="btn" href="/themes">
+            <Link className="btn primary big" href="/themes">
               {t.openGallery}
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M5 12h14m-7-7 7 7-7 7" />
+              </svg>
             </Link>
-            <Link className="btn" href="/docs">
+            <Link className="btn ghost big" href="/docs">
               {t.docs}
             </Link>
           </div>
         </div>
         <div className="panel">
+          <div className="theme-modal-kicker">{lang === "vi" ? "Bắt đầu ngay" : "Get Started"}</div>
           <h2>{t.flow}</h2>
           <p>
             {t.flowText.split("\n").map((line, index) => (
-              <span key={line}>
-                {line}
-                {index < t.flowText.split("\n").length - 1 ? <br /> : null}
+              <span key={line} style={{ display: 'block', marginBottom: '8px' }}>
+                <strong style={{ color: 'var(--accent)', marginRight: '8px' }}>{index + 1}.</strong>
+                {line.replace(/^\d+\.\s*/, '')}
               </span>
             ))}
           </p>
-          <Link className="btn vote" href="/themes">
+          <Link className="btn vote" href="/themes" style={{ width: '100%' }}>
             {t.voteAll}
           </Link>
         </div>
       </section>
+
       <section className="home-summary-strip">
         <div>
+          <div className="icon-box">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect width="18" height="18" x="3" y="3" rx="2" />
+              <path d="M3 9h18" />
+              <path d="M9 21V9" />
+            </svg>
+          </div>
           <strong>{themes.length}</strong>
-          <span>{lang === "vi" ? "theme đang có" : "themes available"}</span>
+          <span>{lang === "vi" ? "theme đang có sẵn trong kho" : "themes available in the gallery"}</span>
         </div>
         <div>
+          <div className="icon-box">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="16 18 22 12 16 6" />
+              <polyline points="8 6 2 12 8 18" />
+            </svg>
+          </div>
           <strong>JSON / Code</strong>
-          <span>{lang === "vi" ? "tải file hoặc copy mã áp" : "download files or copy apply code"}</span>
+          <span>{lang === "vi" ? "tải file JSON hoặc copy mã áp nhanh" : "download JSON files or copy apply code"}</span>
         </div>
         <div>
+          <div className="icon-box">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <polygon points="10 8 16 12 10 16 10 8" />
+            </svg>
+          </div>
           <strong>Live Wallpaper</strong>
-          <span>{lang === "vi" ? "sẵn cấu trúc để mở rộng" : "ready for expansion"}</span>
+          <span>{lang === "vi" ? "hỗ trợ video và hình nền động" : "video and live wallpaper support"}</span>
         </div>
       </section>
+
       <section className="home-top-section">
         <div className="section-heading">
           <div>
@@ -94,6 +123,9 @@ export default function Home() {
           </div>
           <Link className="btn ghost" href="/themes">
             {t.openGallery}
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M5 12h14m-7-7 7 7-7 7" />
+            </svg>
           </Link>
         </div>
         <div className="home-top-grid">
@@ -104,19 +136,30 @@ export default function Home() {
                 className={`home-top-card rank-${index + 1}`}
                 href="/themes"
                 key={theme.id}
-                style={preview ? { backgroundImage: `url(${preview})` } : undefined}
               >
-                <span className="rank-badge">Top {index + 1}</span>
-                <span className="home-top-type">
-                  {formatTagLabel(theme.type, lang)}
-                </span>
-                <strong>{theme.title}</strong>
-                {theme.author ? (
-                  <em>
-                    {t.authorLabel}: {theme.author}
-                  </em>
-                ) : null}
-                {theme.description ? <span>{theme.description}</span> : null}
+                <div className="card-bg">
+                  {preview ? (
+                    <img src={preview} alt="" loading="lazy" />
+                  ) : (
+                    <div className="placeholder-bg" />
+                  )}
+                </div>
+                <div className="card-overlay" />
+                <div className="card-content">
+                  <div style={{ display: 'flex', gap: '8px', marginBottom: 'auto' }}>
+                    <span className="rank-badge">Top {index + 1}</span>
+                    <span className="home-top-type">
+                      {formatTagLabel(theme.type, lang)}
+                    </span>
+                  </div>
+                  <strong>{theme.title}</strong>
+                  {theme.author ? (
+                    <em>
+                      {t.authorLabel}: {theme.author}
+                    </em>
+                  ) : null}
+                  {theme.description ? <span>{theme.description}</span> : null}
+                </div>
               </Link>
             )
           })}

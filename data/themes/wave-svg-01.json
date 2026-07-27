@@ -1,0 +1,21 @@
+{
+  "id": "wave-svg-01",
+  "title": "Blue Wave",
+  "author": "ChickenSoup269",
+  "description": "wave sóng, xanh dương, hợp tag macOS/blue",
+  "type": "code",
+  "json": false,
+  "tags": [
+    "code nền",
+    "wave svg",
+    "macOS",
+    "xanh dương"
+  ],
+  "previewImage": "/images/svg_wave/wave1.png",
+  "theme": {
+    "settings": {
+      "code": "SPC1.eyJ2IjoxLCJ0eXBlIjoidmlzdWFsIiwiZGF0YSI6eyJtb2RlIjoic3ZnV2F2ZSIsImRhdGEiOnsibGluZXMiOjgsImFtcGxpdHVkZVgiOjI0MywiYW1wbGl0dWRlWSI6MzIsIm9mZnNldFgiOjEzMCwic21vb3RobmVzcyI6MC40NSwiZmlsbCI6dHJ1ZSwiY3JhemluZXNzIjoxMCwiYW5nbGUiOi04LCJzdGFydEh1ZSI6MzE3LCJzdGFydFNhdHVyYXRpb24iOjcyLCJzdGFydExpZ2h0bmVzcyI6NzksImVuZEh1ZSI6MjM5LCJlbmRTYXR1cmF0aW9uIjo3MSwiZW5kTGlnaHRuZXNzIjoyMn19fQ"
+    }
+  },
+  "favoriteCount": 0
+}

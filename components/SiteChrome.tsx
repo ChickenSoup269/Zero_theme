@@ -25,6 +25,7 @@ export default function SiteChrome() {
   const navItems = [
     { href: "/themes", label: t.openGallery },
     { href: "/docs", label: t.docs },
+    { href: "/admin", label: "Admin" },
   ]
 
   function isActive(href: string) {
@@ -34,7 +35,9 @@ export default function SiteChrome() {
 
   return (
     <>
-      <nav className={`nav ${menuOpen ? "menu-open" : ""} ${scrolled ? "scrolled" : ""}`}>
+      <nav
+        className={`nav ${menuOpen ? "menu-open" : ""} ${scrolled ? "scrolled" : ""}`}
+      >
         <Link className="brand" href="/">
           <img src="/icon.png" alt="" width="32" height="32" />
           <span>Zero Theme Gallery</span>
@@ -70,7 +73,16 @@ export default function SiteChrome() {
         onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
         aria-label="Scroll to top"
       >
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="3"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
           <path d="M18 15l-6-6-6 6" />
         </svg>
       </button>
